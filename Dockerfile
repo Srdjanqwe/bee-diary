@@ -34,7 +34,7 @@ COPY . .
 # Built frontend assets from stage 1
 COPY --from=frontend /app/public/build ./public/build
 
-RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+RUN composer install --no-dev --no-scripts --optimize-autoloader --ignore-platform-reqs
 
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
