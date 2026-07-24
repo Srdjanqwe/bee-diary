@@ -6,18 +6,7 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# ---------- Stage 2: install Composer (PHP) dependencies ----------
-FROM composer:2 AS vendor
-WORKDIR /app
-COPY database/ database/
-COPY composer.json composer.lock ./
-RUN composer install \
-    --no-dev \
-    --no-scripts \
-    --no-autoloader \
-    --ignore-platform-reqs
-
-# ---------- Stage 3: final runtime image ----------
+# ---------- Stage 2: final runtime image (PHP + composer + nginx) ----------
 FROM php:8.2-fpm-alpine
 
 RUN apk add --no-cache \
@@ -25,6 +14,8 @@ RUN apk add --no-cache \
         supervisor \
         bash \
         gettext \
+        git \
+        unzip \
         postgresql-dev \
         libzip-dev \
         oniguruma-dev \
@@ -32,17 +23,18 @@ RUN apk add --no-cache \
     && docker-php-ext-install pdo pdo_pgsql mbstring zip bcmath \
     && rm -rf /var/cache/apk/*
 
+# Bring in the composer binary (no separate stage/copy of vendor - simpler & more reliable)
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 WORKDIR /var/www/html
 
-# App code
+# Full app code first (composer needs it for package auto-discovery scripts)
 COPY . .
 
-# Vendor from Composer stage, built assets from Node stage
-COPY --from=vendor /app/vendor ./vendor
+# Built frontend assets from stage 1
 COPY --from=frontend /app/public/build ./public/build
 
-# Now that full app code + vendor are in place, finish autoload
-RUN composer dump-autoload --optimize --no-dev 2>/dev/null || true
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs
 
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
