@@ -10,11 +10,15 @@ export default function usePosts() {
     const getPosts = async (
         page = 1, 
         category = '',
+        search_global = '',
+        expired_days = '',
         order_column = 'inspection_date',
         order_direction = 'desc',
         ) => {
         axios.get('api/posts?page=' + page + 
             '&category=' + category +
+            '&search_global=' + search_global +
+            '&expired_days=' + expired_days +
             '&order_column' + order_column +
             '&order_direction' + order_direction)
             .then(response => {

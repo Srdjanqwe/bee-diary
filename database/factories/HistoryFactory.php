@@ -24,7 +24,9 @@ class HistoryFactory extends Factory
             'post_id'=> $posts->random(),
 
             'content' => $this->faker->paragraphs(3, true),
-            'inspection_date' => $this->faker->dateTimeInInterval('-1 week', '+3days')
+            // 'inspection_date' => $this->faker->dateTimeInInterval('-1 week', '+3days')
+            'inspection_date' => $this->faker->dateTimeInInterval('-10days')
+    
         ];
 
         

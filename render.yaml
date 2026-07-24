@@ -1,0 +1,47 @@
+databases:
+  - name: bee-diary-db
+    plan: free
+    databaseName: beediary
+    user: beediary
+
+services:
+  - type: web
+    name: bee-diary
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        sync: false          # set manually in Render dashboard, see instructions
+      - key: APP_URL
+        value: https://bee-diary.onrender.com   # update after first deploy if Render assigns a different subdomain
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: bee-diary-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: bee-diary-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: bee-diary-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: bee-diary-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: bee-diary-db
+          property: password

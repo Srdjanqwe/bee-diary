@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -16,6 +15,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::group(['middleware' => 'auth:sanctum'], function() {
+
+    Route::get('posts/pdf',          [\App\Http\Controllers\Api\PostController::class, 'postsPdf']);
+    Route::get('posts/hive-history', [\App\Http\Controllers\Api\PostController::class, 'hiveHistoryPdf']);
+
     Route::apiResource('posts', \App\Http\Controllers\Api\PostController::class);
     Route::get('histories', [\App\Http\Controllers\Api\PostHistoryController::class, 'index']);
     Route::get('/user', function (Request $request) {
@@ -25,5 +28,13 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 
 Route::get('categories', [\App\Http\Controllers\Api\CategoryController::class, 'index']);
 
-
-
+Route::get('abilities', function(Request $request) {
+    return $request->user()->roles()->with('permissions')
+        ->get()
+        ->pluck('permissions')
+        ->flatten()
+        ->pluck('name')
+        ->unique()
+        ->values()
+        ->toArray();
+});
