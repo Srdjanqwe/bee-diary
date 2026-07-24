@@ -13,6 +13,16 @@ php artisan package:discover --ansi || echo ">>> WARNING: package:discover faile
 echo ">>> Running migrations"
 php artisan migrate --force || echo ">>> WARNING: migrate failed, continuing anyway"
 
+echo ">>> Checking if database needs seeding"
+USER_COUNT=$(PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "${DB_PORT:-5432}" -U "$DB_USERNAME" -d "$DB_DATABASE" -tAc "SELECT COUNT(*) FROM users;" 2>/dev/null | tr -d '[:space:]')
+
+if [ "$USER_COUNT" = "0" ]; then
+    echo ">>> Users table is empty, running db:seed"
+    php artisan db:seed --force || echo ">>> WARNING: db:seed failed, continuing anyway"
+else
+    echo ">>> Users already exist ($USER_COUNT), skipping seed"
+fi
+
 echo ">>> Caching config"
 php artisan config:cache || echo ">>> WARNING: config:cache failed, continuing anyway"
 
