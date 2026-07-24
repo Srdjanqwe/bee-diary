@@ -7,6 +7,9 @@ export PORT="${PORT:-10000}"
 echo ">>> Rendering nginx config for PORT=$PORT"
 envsubst '${PORT}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 
+echo ">>> Running composer package discovery"
+php artisan package:discover --ansi || echo ">>> WARNING: package:discover failed, continuing anyway"
+
 echo ">>> Running migrations"
 php artisan migrate --force || echo ">>> WARNING: migrate failed, continuing anyway"
 
