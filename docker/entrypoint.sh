@@ -4,14 +4,20 @@ set -e
 # Render injects $PORT at runtime; fallback for local docker testing
 export PORT="${PORT:-10000}"
 
-# Substitute ONLY $PORT - leave nginx's own $uri, $document_root etc. untouched
+echo ">>> Rendering nginx config for PORT=$PORT"
 envsubst '${PORT}' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 
-# Run pending migrations on every deploy (safe to leave on; remove if you prefer manual control)
-php artisan migrate --force || true
+echo ">>> Running migrations"
+php artisan migrate --force || echo ">>> WARNING: migrate failed, continuing anyway"
 
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+echo ">>> Caching config"
+php artisan config:cache || echo ">>> WARNING: config:cache failed, continuing anyway"
 
+echo ">>> Caching routes"
+php artisan route:cache || echo ">>> WARNING: route:cache failed, continuing anyway"
+
+echo ">>> Caching views"
+php artisan view:cache || echo ">>> WARNING: view:cache failed, continuing anyway"
+
+echo ">>> Starting nginx + php-fpm"
 exec supervisord -c /etc/supervisor/conf.d/supervisord.conf
