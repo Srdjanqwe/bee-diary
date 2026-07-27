@@ -52,6 +52,10 @@ export default function useAuth() {
             .then(response => {
                 loginUser(response)
             })
+            .catch(() => {
+                // Not logged in yet - this 401 is expected on a fresh page load, nothing to do
+                localStorage.removeItem('loggedIn')
+            })
     }
 
     const logout = async () => {
