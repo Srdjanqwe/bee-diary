@@ -11,9 +11,9 @@ import Login from '../components/Login.vue'
 function auth(to, from, next) {
     if (JSON.parse(localStorage.getItem('loggedIn'))) {
         next()
-    }
-
+    } else {
     next('/login')
+    }
 }
  
 const routes = [
