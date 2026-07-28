@@ -164,7 +164,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, watch  } from "vue";
+import { reactive, ref, onMounted, watch, computed } from "vue";
 import usePosts from "../../composables/posts";
 import useCategories from "../../composables/categories";
 import useHistories from "../../composables/histories";
@@ -177,7 +177,19 @@ const selectedCategory = ref('')
 const search_global = ref('')
 const expired_days = ref('')
 const selectedYear = ref(new Date().getFullYear())
-const yearOptions = Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i)
+const yearOptions = computed(() => {
+    const years = (histories.value?.data || [])
+        .map(h => new Date(h.inspection_date).getFullYear())
+        .filter(y => !isNaN(y))
+    
+      const uniqueYears = [...new Set(years)].sort((a, b) => b - a)
+    
+      if (!uniqueYears.includes(selectedYear.value)) {
+        uniqueYears.unshift(selectedYear.value)
+        uniqueYears.sort((a, b) => b - a)
+      }
+      return uniqueYears
+})
 const orderColumn = ref('inspection_date')
 const orderDirection = ref('desc')
 const open = reactive({})
@@ -214,6 +226,7 @@ const downloadPdf = async () => {
         expired_days:    expired_days.value,
         order_column:    orderColumn.value,
         order_direction: orderDirection.value,
+        year:            selectedYear.value,
       },
       responseType: 'blob'  // ključno - kaže axiоsu da očekuje binarni fajl
     })
