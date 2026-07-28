@@ -121,6 +121,8 @@ class PostController extends Controller
             ->when($request->get('expired_days'), function ($query) use ($request) {
                 $query->whereDate('inspection_date', '<', Carbon::now()->subDays($request->get('expired_days')));
             })
+            ->whereYear('inspection_date', $request->get('year', now()->year))
+            
             ->orderBy($orderColumn, $orderDirection)
             ->pluck('posts.id');
 
