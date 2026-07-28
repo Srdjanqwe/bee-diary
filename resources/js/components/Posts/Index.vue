@@ -178,17 +178,21 @@ const search_global = ref('')
 const expired_days = ref('')
 const selectedYear = ref(new Date().getFullYear())
 const yearOptions = computed(() => {
-    const years = (histories.value?.data || [])
-        .map(h => new Date(h.inspection_date).getFullYear())
-        .filter(y => !isNaN(y))
-    
-      const uniqueYears = [...new Set(years)].sort((a, b) => b - a)
-    
-      if (!uniqueYears.includes(selectedYear.value)) {
-        uniqueYears.unshift(selectedYear.value)
-        uniqueYears.sort((a, b) => b - a)
-      }
-      return uniqueYears
+  const currentYear = new Date().getFullYear()
+
+  const years = (histories.value?.data || [])
+    .filter(h => h.inspection_date) // odbaci null/prazne datume PRE parsiranja
+    .map(h => new Date(h.inspection_date).getFullYear())
+    .filter(y => !isNaN(y) && y > 2000 && y <= currentYear) // odbaci sve nerealne godine (npr. 1970)
+
+  const uniqueYears = [...new Set(years)].sort((a, b) => b - a)
+
+  if (!uniqueYears.includes(selectedYear.value)) {
+    uniqueYears.unshift(selectedYear.value)
+    uniqueYears.sort((a, b) => b - a)
+  }
+
+  return uniqueYears
 })
 const orderColumn = ref('inspection_date')
 const orderDirection = ref('desc')
