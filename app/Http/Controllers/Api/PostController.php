@@ -53,6 +53,10 @@ class PostController extends Controller
                 ->when(request('expired_days'), function($query) {
                     $query->whereDate('inspection_date', '<', Carbon::now()->subDays(request('expired_days')));
                 })
+
+                // YEAR FILTER - uvek se primenjuje, default je tekuca godina
+                ->whereYear('inspection_date', request('year', now()->year))
+                
                 ->orderBy($orderColumn, $orderDirection)
                 ->paginate(10);
 

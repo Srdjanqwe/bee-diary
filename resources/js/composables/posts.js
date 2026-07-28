@@ -14,13 +14,15 @@ export default function usePosts() {
         expired_days = '',
         order_column = 'inspection_date',
         order_direction = 'desc',
+        year = '',
         ) => {
         axios.get('api/posts?page=' + page + 
             '&category=' + category +
             '&search_global=' + search_global +
             '&expired_days=' + expired_days +
-            '&order_column' + order_column +
-            '&order_direction' + order_direction)
+            '&order_column=' + order_column +
+            '&order_direction=' + order_direction +
+            '&year=' + year)
             .then(response => {
                 posts.value = response.data;
                 if (order_column === 'inspection_date' && order_direction === 'asc') {

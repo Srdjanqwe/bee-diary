@@ -14,6 +14,11 @@
               <div class="flex-1">
                 <div class="mb-4 grid lg:grid-cols-4 gap-4">
                   <input v-model="search_global" type="text" placeholder="Search" class="inline-block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+
+                <!-- SEARCH by YEARS -->
+                  <select v-model="selectedYear" class="inline-block mt-1 w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 text-gray-500">
+                      <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}</option>
+                    </select>
                 </div>
 
                 <!-- PDF dugme — između Search i filtera u headeru -->
@@ -171,6 +176,8 @@ import { TailwindPagination } from 'laravel-vue-pagination';
 const selectedCategory = ref('')
 const search_global = ref('')
 const expired_days = ref('')
+const selectedYear = ref(new Date().getFullYear())
+const yearOptions = Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i)
 const orderColumn = ref('inspection_date')
 const orderDirection = ref('desc')
 const open = reactive({})
@@ -187,7 +194,7 @@ const { histories, getHistories } = useHistories()
 const { categories, uniqueDivisions, getCategories } = useCategories()
 
 onMounted(() => {
-  getPosts()
+  getPosts(1, selectedCategory.value, search_global.value, expired_days.value, orderColumn.value, orderDirection.value, selectedYear.value)
   getCategories()
   getHistories()
 
@@ -343,7 +350,8 @@ const updateOrdering = (column) => {
     search_global.value,
     expired_days.value,
     orderColumn.value,
-    orderDirection.value
+    orderDirection.value,
+    selectedYear.value
   );
 }
 
@@ -359,22 +367,27 @@ const handlePageChange = (page) => {
 resetSvgIcons();
 
 // Pozivanje funkcije koja dobavlja postove za novu stranicu sa trenutnom selektovanom kategorijom
-getPosts(page, selectedCategory.value, search_global.value, expired_days.value, orderColumn.value, orderDirection.value);
+getPosts(page, selectedCategory.value, search_global.value, expired_days.value, orderColumn.value, orderDirection.value, selectedYear.value);
 };
 
 watch(selectedCategory, (current, _previous) => {
   resetSvgIcons();
-  getPosts(1, current, search_global.value, expired_days.value)
+  getPosts(1, current, search_global.value, expired_days.value, orderColumn.value, orderDirection.value, selectedYear.value)
 })
 
 watch(search_global, (current, _previous) => {
   resetSvgIcons();
-  getPosts(1, selectedCategory.value, current, expired_days.value)
+  getPosts(1, selectedCategory.value, current, expired_days.value, orderColumn.value, orderDirection.value, selectedYear.value)
 })
 
 watch(expired_days, (current, _previous) => {
   resetSvgIcons();
-  getPosts(1, selectedCategory.value, search_global.value, current)
+  getPosts(1, selectedCategory.value, search_global.value, current, orderColumn.value, orderDirection.value, selectedYear.value)
+})
+    
+watch(selectedYear, (current, _previous) => {
+  resetSvgIcons();
+  getPosts(1, selectedCategory.value, search_global.value, expired_days.value, orderColumn.value, orderDirection.value, current)
 })
 
 </script>
